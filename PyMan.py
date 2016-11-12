@@ -3,7 +3,6 @@
 
 import os, sys
 import pygame
-import level001
 import basicSprite
 from pygame.locals import *
 from pygame import mixer
@@ -208,13 +207,22 @@ class PyManMain:
 
 
                 """Update the sprites"""
-                self.snake_sprites.update(self.block_sprites)
-                self.ghost_sprites.update(self.block_sprites)
-                self.ghost2_sprites.update(self.block_sprites)
-                self.ghost3_sprites.update(self.block_sprites)
-                self.ghost4_sprites.update(self.block_sprites)
+                if self.snake_sprites:
+                    self.snake_sprites.update(self.block_sprites)
+                if self.ghost_sprites:
+                    self.ghost_sprites.update(self.block_sprites)
+                if self.ghost_sprites2:
+                    self.ghost2_sprites.update(self.block_sprites)
+                if self.ghost_sprites3:
+                    self.ghost3_sprites.update(self.block_sprites)
+                if self.ghost_sprites4:
+                    self.ghost4_sprites.update(self.block_sprites)
 
-                if pygame.sprite.collide_rect(self.ghost,self.snake) or pygame.sprite.collide_rect(self.ghost2,self.snake) or pygame.sprite.collide_rect(self.ghost3,self.snake) or pygame.sprite.collide_rect(self.ghost4,self.snake):
+                if (self.snake and (
+                        (self.ghost and pygame.sprite.collide_rect(self.ghost,self.snake)) or
+                        (self.ghost2 and pygame.sprite.collide_rect(self.ghost2,self.snake)) or
+                        (self.ghost3 and pygame.sprite.collide_rect(self.ghost3,self.snake)) or
+                        (self.ghost4 and pygame.sprite.collide_rect(self.ghost4,self.snake)))):
                     self.collisions+=1
                     print "Col+1",self.collisions
                     if self.collisions==self.collisiontol:
@@ -238,11 +246,17 @@ class PyManMain:
                     self.screen.blit(text, textpos)
 
                 self.pellet_sprites.draw(self.screen)
-                self.snake_sprites.draw(self.screen)
-                self.ghost_sprites.draw(self.screen)
-                self.ghost2_sprites.draw(self.screen)
-                self.ghost3_sprites.draw(self.screen)
-                self.ghost4_sprites.draw(self.screen)
+                if self.snake_sprites:
+                    self.snake_sprites.draw(self.screen)
+                if self.ghost_sprites:
+                    self.ghost_sprites.draw(self.screen)
+                if self.ghost_sprites2:
+                    self.ghost2_sprites.draw(self.screen)
+                if self.ghost_sprites3:
+                    self.ghost3_sprites.draw(self.screen)
+                if self.ghost_sprites4:
+                    self.ghost4_sprites.draw(self.screen)
+
                 pygame.display.flip()
                 clock.tick(FRAME_RATE)
                 #print clock.get_fps()
@@ -254,40 +268,64 @@ class PyManMain:
         x_offset = (BLOCK_SIZE/2)
         y_offset = (BLOCK_SIZE/2)
         """Load the level"""
-        level1 = level001.level()
-        layout = level1.getLayout()
-        img_list = level1.getSprites()
+
+        #import level001
+        #level = level001.Level001()
+
+        import level002
+        level = level002.Level002()
+
+        layout = level.getLayout()
+        img_list = level.getSprites()
 
         self.pellet_sprites = pygame.sprite.Group()
         self.block_sprites = pygame.sprite.Group()
         self.gwall_sprites = pygame.sprite.Group()
 
+        self.snake = None
+        self.ghost = None
+        self.ghost2 = None
+        self.ghost3 = None
+        self.ghost4 = None
+
+        self.snake_sprites = None
+        self.ghost_sprites = None
+        self.ghost_sprites2 = None
+        self.ghost_sprites3 = None
+        self.ghost_sprites4 = None
+
         for y in xrange(len(layout)):
             for x in xrange(len(layout[y])):
                 """Get the center point for the rects"""
                 centerPoint = [(x*BLOCK_SIZE)+x_offset,(y*BLOCK_SIZE+y_offset)]
-                if layout[y][x]==level1.BLOCK:
-                    self.block_sprites.add(basicSprite.Sprite(centerPoint, img_list[level1.BLOCK]))
-                elif layout[y][x]==level1.GWALL:
-                    self.gwall_sprites.add(basicSprite.Sprite(centerPoint, img_list[level1.GWALL]))
-                elif layout[y][x]==level1.SNAKE:
-                    self.snake = Snake(centerPoint,img_list[level1.SNAKE])
-                elif layout[y][x]==level1.PELLET:
-                    self.pellet_sprites.add(basicSprite.Sprite(centerPoint, img_list[level1.PELLET]))
-                elif layout[y][x]==level1.GHOST:
-                    self.ghost = Ghost(centerPoint,img_list[level1.GHOST])
-                elif layout[y][x]==level1.GHOST2:
-                    self.ghost2 = Ghost(centerPoint,img_list[level1.GHOST2])
-                elif layout[y][x]==level1.GHOST3:
-                    self.ghost3 = Ghost(centerPoint,img_list[level1.GHOST3])
-                elif layout[y][x]==level1.GHOST4:
-                    self.ghost4 = Ghost(centerPoint,img_list[level1.GHOST4])
+                if layout[y][x]==level.BLOCK:
+                    self.block_sprites.add(basicSprite.Sprite(centerPoint, img_list[level.BLOCK]))
+                elif layout[y][x]==level.GWALL:
+                    self.gwall_sprites.add(basicSprite.Sprite(centerPoint, img_list[level.GWALL]))
+                elif layout[y][x]==level.SNAKE:
+                    self.snake = Snake(centerPoint,img_list[level.SNAKE])
+                elif layout[y][x]==level.PELLET:
+                    self.pellet_sprites.add(basicSprite.Sprite(centerPoint, img_list[level.PELLET]))
+                elif layout[y][x]==level.GHOST:
+                    self.ghost = Ghost(centerPoint,img_list[level.GHOST])
+                elif layout[y][x]==level.GHOST2:
+                    self.ghost2 = Ghost(centerPoint,img_list[level.GHOST2])
+                elif layout[y][x]==level.GHOST3:
+                    self.ghost3 = Ghost(centerPoint,img_list[level.GHOST3])
+                elif layout[y][x]==level.GHOST4:
+                    self.ghost4 = Ghost(centerPoint,img_list[level.GHOST4])
         """Create the Snake group"""
-        self.snake_sprites = pygame.sprite.RenderPlain((self.snake))
-	self.ghost_sprites = pygame.sprite.RenderPlain((self.ghost))
-	self.ghost2_sprites = pygame.sprite.RenderPlain((self.ghost2))
-	self.ghost3_sprites = pygame.sprite.RenderPlain((self.ghost3))
-	self.ghost4_sprites = pygame.sprite.RenderPlain((self.ghost4))
+        if self.snake:
+            self.snake_sprites = pygame.sprite.RenderPlain((self.snake))
+        if self.ghost:
+            self.ghost_sprites = pygame.sprite.RenderPlain((self.ghost))
+        if self.ghost2:
+            self.ghost2_sprites = pygame.sprite.RenderPlain((self.ghost2))
+        if self.ghost3:
+            self.ghost3_sprites = pygame.sprite.RenderPlain((self.ghost3))
+        if self.ghost4:
+            self.ghost4_sprites = pygame.sprite.RenderPlain((self.ghost4))
+
 if __name__ == "__main__":
 	MainWindow = PyManMain(500,575)
 	MainWindow.MainLoop()

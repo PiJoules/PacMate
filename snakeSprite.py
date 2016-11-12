@@ -5,7 +5,7 @@ import basicSprite
 from helpers import *
 from random import randint
 
-from mode import BLOCK_SIZE
+from mode import *
 
 
 class Snake(basicSprite.Sprite):
@@ -16,10 +16,12 @@ class Snake(basicSprite.Sprite):
         """Initialize the number of pellets eaten"""
         self.pellets = 0
         """Set the number of Pixels to move each time"""
-        #self.dist=3
+        if MODE == DIRECTIONAL:
+            self.dist=3
 
-        # Move only one space at a time
-        self.dist = BLOCK_SIZE
+        if MODE == ABSOLUTE:
+            # Move only one space at a time
+            self.dist = BLOCK_SIZE
 
 
         """Initialize how much we are moving"""
@@ -77,8 +79,9 @@ class Snake(basicSprite.Sprite):
         else:
             self.direction=0
 
-        # Move only one space at a time
-        self.nextdir = 0
+        if MODE == ABSOLUTE:
+            # Move only one space at a time
+            self.nextdir = 0
 
 
 
