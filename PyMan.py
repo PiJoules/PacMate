@@ -11,6 +11,7 @@ from snakeSprite import Snake,Ghost
 from menu import *
 from image import *
 
+import importlib
 import socket
 import threading
 import SocketServer
@@ -30,7 +31,6 @@ clock = pygame.time.Clock()
 if not pygame.font: print 'Warning, fonts disabled'
 if not pygame.mixer: print 'Warning, sound disabled'
 
-#BLOCK_SIZE = 24
 from mode import BLOCK_SIZE
 
 FRAME_RATE = 30
@@ -45,9 +45,6 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
         data = self.request.recv(256)
         print "data:", data
         print PACMAN
-        #data = int(data)
-        #if ((data == K_RIGHT) or (data == K_LEFT) or (data == K_UP) or (data == K_DOWN)):
-        #    PACMAN.MoveKeyDown(data)
         data = data.strip()
         if data == "L":
             PACMAN.MoveKeyDown(K_LEFT)
@@ -71,9 +68,9 @@ def mainmenu(screen):
 		('Exit',       3, None)])
 
 	menu_options = cMenu(50, 50, 20, 5, 'vertical', 100, screen,
-                [('Back',  0, None),
-                 ('opt 1',      200, None),
-		 ('opt 2',      200, None)])
+                [('Back', 0, None),
+                 ('opt 1', 200, None),
+                 ('opt 2', 200, None)])
 
 
 	# Center the menu on the draw_surface (the entire screen here)
@@ -145,7 +142,7 @@ class PyManMain:
     """The Main PyMan Class - This class handles the main
     initialization and creating of the Game."""
 
-    def __init__(self, width=640,height=480):
+    def __init__(self, level_module, width=640,height=480):
         """Initialize"""
         pygame.init()
 
@@ -176,6 +173,8 @@ class PyManMain:
         server_thread.start()
         print "Server loop running in thread:", server_thread.name
 
+        self.level_module = level_module
+
 
     def MainLoop(self):
         """This is the Main Loop of the Game"""
@@ -200,7 +199,7 @@ class PyManMain:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         sys.exit()
-                    elif event.type == KEYDOWN: #or event.type == KEYUP
+                    elif event.type == KEYDOWN:
                         if ((event.key == K_RIGHT) or (event.key == K_LEFT) or (event.key == K_UP) or (event.key == K_DOWN)):
                             print "event key:", event.key
                             self.snake.MoveKeyDown(event.key)
@@ -211,11 +210,11 @@ class PyManMain:
                     self.snake_sprites.update(self.block_sprites)
                 if self.ghost_sprites:
                     self.ghost_sprites.update(self.block_sprites)
-                if self.ghost_sprites2:
+                if self.ghost2_sprites:
                     self.ghost2_sprites.update(self.block_sprites)
-                if self.ghost_sprites3:
+                if self.ghost3_sprites:
                     self.ghost3_sprites.update(self.block_sprites)
-                if self.ghost_sprites4:
+                if self.ghost4_sprites:
                     self.ghost4_sprites.update(self.block_sprites)
 
                 if (self.snake and (
@@ -246,35 +245,38 @@ class PyManMain:
                     self.screen.blit(text, textpos)
 
                 self.pellet_sprites.draw(self.screen)
-                if self.snake_sprites:
+
+                if self.snake_sprites is not None:
                     self.snake_sprites.draw(self.screen)
-                if self.ghost_sprites:
+                if self.ghost_sprites is not None:
                     self.ghost_sprites.draw(self.screen)
-                if self.ghost_sprites2:
+                if self.ghost2_sprites is not None:
                     self.ghost2_sprites.draw(self.screen)
-                if self.ghost_sprites3:
+                if self.ghost3_sprites is not None:
                     self.ghost3_sprites.draw(self.screen)
-                if self.ghost_sprites4:
+                if self.ghost4_sprites is not None:
                     self.ghost4_sprites.draw(self.screen)
 
                 pygame.display.flip()
                 clock.tick(FRAME_RATE)
-                #print clock.get_fps()
+
             self.sounds['die'].play()
+
+    def get_level(self):
+        mod = importlib.import_module(self.level_module)
+        lvl_cls = getattr(mod, "Level")
+        return lvl_cls()
+
 
     def LoadSprites(self):
         """Load all of the sprites that we need"""
         """calculate the center point offset"""
         x_offset = (BLOCK_SIZE/2)
         y_offset = (BLOCK_SIZE/2)
+
         """Load the level"""
 
-        #import level001
-        #level = level001.Level001()
-
-        import level002
-        level = level002.Level002()
-
+        level = self.get_level()
         layout = level.getLayout()
         img_list = level.getSprites()
 
@@ -290,9 +292,9 @@ class PyManMain:
 
         self.snake_sprites = None
         self.ghost_sprites = None
-        self.ghost_sprites2 = None
-        self.ghost_sprites3 = None
-        self.ghost_sprites4 = None
+        self.ghost2_sprites = None
+        self.ghost3_sprites = None
+        self.ghost4_sprites = None
 
         for y in xrange(len(layout)):
             for x in xrange(len(layout[y])):
@@ -314,6 +316,7 @@ class PyManMain:
                     self.ghost3 = Ghost(centerPoint,img_list[level.GHOST3])
                 elif layout[y][x]==level.GHOST4:
                     self.ghost4 = Ghost(centerPoint,img_list[level.GHOST4])
+
         """Create the Snake group"""
         if self.snake:
             self.snake_sprites = pygame.sprite.RenderPlain((self.snake))
@@ -326,7 +329,18 @@ class PyManMain:
         if self.ghost4:
             self.ghost4_sprites = pygame.sprite.RenderPlain((self.ghost4))
 
+
+def get_args():
+    from argparse import ArgumentParser
+    parser = ArgumentParser()
+    parser.add_argument("-l", "--level", default="level001",
+                        help="Module to load as level to plat on.")
+    args = parser.parse_args()
+    return args
+
+
 if __name__ == "__main__":
-	MainWindow = PyManMain(500,575)
-	MainWindow.MainLoop()
+    args = get_args()
+    MainWindow = PyManMain(args.level, width=500, height=575)
+    MainWindow.MainLoop()
 

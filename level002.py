@@ -1,11 +1,9 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from level import Level
+from level import BaseLevel
 
-class Level002(Level):
-    """Level 1 of the PyMan Game"""
-
+class Level(BaseLevel):
     def getLayout(self):
         return [[9, 9, 9, 9, 9, 9, 9, 9, 9],
                 [9, 1, 1, 1, 1, 1, 1, 1, 9],

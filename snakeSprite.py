@@ -28,12 +28,12 @@ class Snake(basicSprite.Sprite):
         self.xMove = 0
         self.yMove = 0
 
-	self.score=0
+        self.score=0
 
-	self.direction=0
-	self.nextdir=0
-	self.xdir=[0,-self.dist,self.dist,0,0]
-	self.ydir=[0,0,0,-self.dist,self.dist]
+        self.direction=0
+        self.nextdir=0
+        self.xdir=[0,-self.dist,self.dist,0,0]
+        self.ydir=[0,0,0,-self.dist,self.dist]
 
 
     def MoveKeyDown(self, key):
