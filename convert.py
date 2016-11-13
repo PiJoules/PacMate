@@ -84,6 +84,7 @@ def nearest_coord(grid, x_off, rad):
     min_dist = float("Inf")
     min_coord = (0,0)
 
+
     for y, row in enumerate(grid):
         if MEAN_RADS[y] > rad:
             for x, pair in enumerate(row):

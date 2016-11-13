@@ -72,7 +72,6 @@ class Snake(basicSprite.Sprite):
 		self.yMove=self.ydir[self.direction]
 
 		self.rect.move_ip(self.xMove,self.yMove)
-        print(self.xMove, self.yMove)
 
         if pygame.sprite.spritecollide(self, block_group, False):
             self.rect.move_ip(-self.xMove,-self.yMove)

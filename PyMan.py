@@ -167,6 +167,7 @@ class PyManMain:
         self.collisions=0;
 
         # Set tcp event handler
+        import multiprocessing
         #self.server = ThreadedTCPServer((SOURCE_IP, TCP_PORT), ThreadedTCPRequestHandler)
         #self.server.allow_reuse_address = True
         #server_thread = threading.Thread(target=self.server.serve_forever)
@@ -176,11 +177,14 @@ class PyManMain:
         thr1 = threading.Thread(target=self.set_pos)
         thr1.daemon = True
         thr1.start()
+        #x = multiprocessing.Process(target=self.set_pos)
+        #x.start()
 
         self.level_module = level_module
 
 
     def set_pos(self):
+        print("started setting pos")
         while True:
             line = sys.stdin.readline().strip()
             print("latest_data:", line)
@@ -199,7 +203,7 @@ class PyManMain:
             coord = nearest_coord(GRID, x_off, rad)
 
             print("coord:", coord)
-            self.snake.setPos(coord[0], coord[1])
+            self.snake.setPos(*coord)
 
 
     def MainLoop(self):
