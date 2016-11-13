@@ -6,6 +6,10 @@ from helpers import *
 from random import randint
 
 from mode import *
+from convert import GRID
+
+import time
+import random
 
 
 class Snake(basicSprite.Sprite):
@@ -54,8 +58,8 @@ class Snake(basicSprite.Sprite):
 		self.nextdir=4
 
     def setPos(self, x, y):
-        self.rect.top = BLOCK_SIZE*max(x,1)
-        self.rect.left = BLOCK_SIZE*max(y,1)
+        self.rect.top = BLOCK_SIZE*min(len(GRID)-1, max(y,1))
+        self.rect.left = BLOCK_SIZE*min(len(GRID[0])-1, max(x,1))
 
     def update(self,block_group):
         """Called when the Snake sprit should update itself"""
@@ -101,17 +105,25 @@ class Ghost(basicSprite.Sprite):
         self.xMove = 0
         self.yMove = 0
 
-	self.direction=1
-	self.nextdir=3
-	self.xdir=[0,-self.dist,self.dist,0,0]
-	self.ydir=[0,0,0,-self.dist,self.dist]
+        self.direction=1
+        self.nextdir=3
+        self.next_x = self.next_y = 3
+        self.xdir=[0,-self.dist,self.dist,0,0]
+        self.ydir=[0,0,0,-self.dist,self.dist]
+        self.last_time = time.time()
 
     def update(self,block_group):
         """Called when the Ghost sprit should update itself"""
-	#print self.nextdir,self.direction
+        #print self.nextdir,self.direction
 
-	self.xMove=self.xdir[self.nextdir]
-	self.yMove=self.ydir[self.nextdir]
+        #self.xMove=self.xdir[self.nextdir]
+        #self.yMove=self.ydir[self.nextdir]
+        if time.time() - self.last_time > 1:
+            self.next_x = random.randint(0,3)
+            self.next_y = random.randint(0,3)
+            self.last_time = time.time()
+        self.xMove=self.xdir[self.next_x]
+        self.yMove=self.ydir[self.next_y]
 
         self.rect.move_ip(self.xMove,self.yMove)
 
@@ -128,12 +140,12 @@ class Ghost(basicSprite.Sprite):
 				self.nextdir=randint(3,4)
 			else:
 				self.nextdir=randint(1,2)
-	else:
-		self.direction=self.nextdir
-		if self.nextdir<3:
-			self.nextdir=randint(3,4)
-		else:
-			self.nextdir=randint(1,2)
+        else:
+            self.direction=self.nextdir
+            if self.nextdir<3:
+                self.nextdir=randint(3,4)
+            else:
+                self.nextdir=randint(1,2)
 
 
 
