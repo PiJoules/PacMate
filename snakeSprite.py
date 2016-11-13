@@ -53,6 +53,9 @@ class Snake(basicSprite.Sprite):
         elif (key == K_DOWN):
 		self.nextdir=4
 
+    def setPos(self, x, y):
+        self.rect.top = BLOCK_SIZE*max(x,1)
+        self.rect.left = BLOCK_SIZE*max(y,1)
 
     def update(self,block_group):
         """Called when the Snake sprit should update itself"""
@@ -69,20 +72,20 @@ class Snake(basicSprite.Sprite):
 		self.yMove=self.ydir[self.direction]
 
 		self.rect.move_ip(self.xMove,self.yMove)
+        print(self.xMove, self.yMove)
 
-		if pygame.sprite.spritecollide(self, block_group, False):
-			self.rect.move_ip(-self.xMove,-self.yMove)
-			self.yMove=0
-			self.xMove=0
-			self.direction=0
-			self.nextdir=0
+        if pygame.sprite.spritecollide(self, block_group, False):
+            self.rect.move_ip(-self.xMove,-self.yMove)
+            self.yMove=0
+            self.xMove=0
+            self.direction=0
+            self.nextdir=0
         else:
             self.direction=0
 
         if MODE == ABSOLUTE:
             # Move only one space at a time
             self.nextdir = 0
-
 
 
 class Ghost(basicSprite.Sprite):

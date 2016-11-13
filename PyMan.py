@@ -15,6 +15,7 @@ import importlib
 import socket
 import threading
 import SocketServer
+from convert import *
 
 # TODO
 # > add power pills
@@ -166,14 +167,39 @@ class PyManMain:
         self.collisions=0;
 
         # Set tcp event handler
-        self.server = ThreadedTCPServer((SOURCE_IP, TCP_PORT), ThreadedTCPRequestHandler)
-        self.server.allow_reuse_address = True
-        server_thread = threading.Thread(target=self.server.serve_forever)
-        server_thread.daemon = True
-        server_thread.start()
-        print "Server loop running in thread:", server_thread.name
+        #self.server = ThreadedTCPServer((SOURCE_IP, TCP_PORT), ThreadedTCPRequestHandler)
+        #self.server.allow_reuse_address = True
+        #server_thread = threading.Thread(target=self.server.serve_forever)
+        #server_thread.daemon = True
+        #server_thread.start()
+        #print "Server loop running in thread:", server_thread.name
+        thr1 = threading.Thread(target=self.set_pos)
+        thr1.daemon = True
+        thr1.start()
 
         self.level_module = level_module
+
+
+    def set_pos(self):
+        while True:
+            line = sys.stdin.readline().strip()
+            print("latest_data:", line)
+
+            x_off, rad = line.split(",")
+            x_off = int(x_off)
+            rad = int(rad)
+
+            # Ignore ones that are out of bounds
+            if x_off < LEFT_LIM or x_off > RIGHT_LIM:
+                continue
+            if rad < BACK_LIM or rad > FRONT_LIM:
+                continue
+
+            print("x_off: {}, rad: {}".format(x_off, rad))
+            coord = nearest_coord(GRID, x_off, rad)
+
+            print("coord:", coord)
+            self.snake.setPos(coord[0], coord[1])
 
 
     def MainLoop(self):
